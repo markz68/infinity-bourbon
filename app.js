@@ -9,11 +9,11 @@ const seed=[
  {type:'add',name:'Wild Turkey Rare Breed',date:'2021-10-11',amount:1.5,proof:112.8},
  {type:'add',name:"Maker's Mark Cask Strength",date:'2023-07-16',amount:1.5,proof:110.7}
 ];
+const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T12:00:00'));
 let entries;
 try {const stored=localStorage.getItem(KEY);entries=stored===null?structuredClone(seed):JSON.parse(stored);if(!validEntries(entries))throw Error('Invalid data');if(stored===null)localStorage.setItem(KEY,JSON.stringify(entries));}catch(e){alert('Could not load saved data. Do not clear site storage. Error: '+e.message);entries=[];}
 const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n.toFixed(d)).toLocaleString(undefined,{maximumFractionDigits:d});
-const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T12:00:00'));
 function validEntries(a){return Array.isArray(a)&&a.length<=100000&&a.every(x=>x&&['add','pour'].includes(x.type)&&safeDate(x.date)&&Number.isFinite(x.amount)&&x.amount>0&&x.amount<=100000&&(!x.note||typeof x.note==='string'&&x.note.length<=500)&&(x.type!=='add'||typeof x.name==='string'&&x.name.trim().length>0&&x.name.length<=100&&Number.isFinite(x.proof)&&x.proof>0&&x.proof<=200));}
 function calculate(list){let parts=[];let volume=0;let adds=0,pours=0;for(const e of list){if(e.type==='add'){parts.push({name:e.name,amount:e.amount,proof:e.proof});volume+=e.amount;adds++;}else{if(e.amount>volume+1e-8)throw Error('A pour exceeds the amount available at that point in history');const factor=volume>0?Math.max(0,(volume-e.amount)/volume):0;for(const p of parts)p.amount*=factor;volume=Math.max(0,volume-e.amount);pours++;}}const weighted=parts.reduce((s,p)=>s+p.amount*p.proof,0);return{parts:parts.filter(p=>p.amount>1e-9),volume,proof:volume>1e-9?weighted/volume:0,adds,pours};}
 function node(tag,cls,content){const el=document.createElement(tag);if(cls)el.className=cls;if(content!==undefined)el.textContent=content;return el;}
