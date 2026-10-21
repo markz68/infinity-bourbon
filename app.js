@@ -1,14 +1,6 @@
 'use strict';
 const KEY='infinity-bourbon-v1';
-const seed=[
- {type:'add',name:'Weller Special Reserve',date:'2021-01-04',amount:1,proof:90},
- {type:'add',name:'Bulleit',date:'2021-01-04',amount:1.5,proof:90},
- {type:'add',name:'Basil Hayden',date:'2021-01-04',amount:1,proof:80},
- {type:'add',name:'Elijah Craig Small Batch',date:'2021-01-04',amount:1,proof:94},
- {type:'add',name:"Maker's Mark",date:'2021-04-27',amount:1.5,proof:90},
- {type:'add',name:'Wild Turkey Rare Breed',date:'2021-10-11',amount:1.5,proof:112.8},
- {type:'add',name:"Maker's Mark Cask Strength",date:'2023-07-16',amount:1.5,proof:110.7}
-];
+const seed=[];
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T12:00:00'));
 let entries;
 try {const stored=localStorage.getItem(KEY);entries=stored===null?structuredClone(seed):JSON.parse(stored);if(!validEntries(entries))throw Error('Invalid data');if(stored===null)localStorage.setItem(KEY,JSON.stringify(entries));}catch(e){alert('Could not load saved data. Do not clear site storage. Error: '+e.message);entries=[];}
@@ -29,7 +21,8 @@ function toast(message){const el=$('toast');el.textContent=message;el.style.disp
 let mode='add';function openForm(type){mode=type;$('entryForm').reset();$('formError').textContent='';$('entryDate').value=[new Date().getFullYear(),String(new Date().getMonth()+1).padStart(2,'0'),String(new Date().getDate()).padStart(2,'0')].join('-');$('dialogTitle').textContent=type==='add'?'Add bourbon':'Record pour';$('submitEntry').textContent=type==='add'?'Save addition':'Save pour';$('addFields').hidden=type==='pour';$('whiskeyName').required=type==='add';$('whiskeyProof').required=type==='add';$('entryDialog').showModal();}
 $('addBtn').onclick=()=>openForm('add');$('pourBtn').onclick=()=>openForm('pour');$('closeDialog').onclick=()=>$('entryDialog').close();
 $('entryForm').onsubmit=e=>{e.preventDefault();const amount=Number($('entryAmount').value);const date=$('entryDate').value;const note=$('entryNote').value.trim();const record={type:mode,date,amount};if(note)record.note=note;if(mode==='add'){record.name=$('whiskeyName').value.trim();record.proof=Number($('whiskeyProof').value);}try{save([...entries,record]);$('entryDialog').close();toast(mode==='add'?'Bourbon added':'Pour recorded');}catch(err){$('formError').textContent=err.message;}};
-$('undoBtn').onclick=()=>{if(entries.length&&confirm('Remove the most recent transaction? This cannot be undone.')){try{save(entries.slice(0,-1));toast('Last transaction removed');}catch(e){alert(e.message);}}};
+$('undoBtn').onclick=()=>{if(!entries.length)return;const last=entries[entries.length-1];const description=last.type==='add'?last.name+' · '+fmt(last.amount,3)+' oz · '+fmt(last.proof,3)+' proof':'Pour · '+fmt(last.amount,3)+' oz';if(confirm('Remove the most recent transaction?\\n\\n'+description+'\\nDate: '+last.date+'\\n\\nThis cannot be undone.')){try{save(entries.slice(0,-1));toast('Last transaction removed');}catch(e){alert(e.message);}}};
+$('newBottleBtn').onclick=()=>{if(!entries.length){toast('Your bottle is already empty');return;}if(!confirm('START NEW BOTTLE\\n\\nThis will remove all '+entries.length+' transactions from this device.\\n\\nDownload a JSON backup first. This is not reversible with Undo Last.\\n\\nContinue?'))return;if(!confirm('FINAL CONFIRMATION\\n\\nClear this bottle and start fresh?\\n\\nIf you sync afterward, the empty history may also replace your Google Drive copy.'))return;try{save([]);toast('New empty bottle started');backupDialog.close();}catch(e){alert(e.message);}};
 function download(filename,content,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 $('exportJson').onclick=()=>download('infinity-bourbon-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:'Infinity Bourbon',schemaVersion:1,exportedAt:new Date().toISOString(),transactions:entries},null,2),'application/json');
 $('exportCsv').onclick=()=>{const fields=['type','date','name','amount','proof','note'];const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';const csv=[fields.join(','),...entries.map(e=>fields.map(k=>q(e[k])).join(','))].join('\r\n');download('infinity-bourbon-history.csv','\ufeff'+csv,'text/csv;charset=utf-8');};
