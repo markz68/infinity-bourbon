@@ -1,7 +1,1 @@
-Infinity Bourbon v1.2.2 diagnostics fix
-
-Upload drive-sync.js, index.html and sw.js to GitHub repository root.
-Do not replace drive-config.js. Keep independent JSON backups.
-Do not approve any replace-local prompt until cloud record count and content are verified.
-This version normalizes transaction key ordering and legacy sync baselines, displays local/cloud record counts, and verifies first-time cloud uploads.
-It does NOT add a force-upload option or automatically resolve conflicts.
+Infinity Bourbon v1.2.3 recovery update. Upload drive-sync.js, index.html, sw.js to the GitHub repository root. Do not upload drive-config.js or delete browser site data. Back up local data first. The recovery button deliberately replaces the cloud backup only after two confirmations, checks that the cloud has not changed during preview, and verifies upload by downloading it again. Not atomic across devices: avoid concurrent edits.

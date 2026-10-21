@@ -1,4 +1,4 @@
-/* Infinity Bourbon Google Drive manual sync v1.2.2. No credentials are stored. */
+/* Infinity Bourbon Google Drive manual sync v1.2.3. No credentials are stored. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id), FILE='infinity-bourbon.json', SCOPE='https://www.googleapis.com/auth/drive.appdata';
 const BASE='infinity-bourbon-drive-base-v1', KEY='infinity-bourbon-v1';
@@ -11,20 +11,51 @@ const counts=x=>{const additions=x.filter(e=>e.type==='add').length;return `${x.
 // Legacy v1.2.1 baseline is raw JSON; normalize it when reading.
 const base=()=>{const raw=localStorage.getItem(BASE);if(raw===null)return null;try{const data=JSON.parse(raw);return Array.isArray(data)?serial(data):null;}catch{return null;}};
 const setBase=x=>localStorage.setItem(BASE,serial(x));
-function setConnected(yes){$('driveSync').disabled=!yes;$('driveDisconnect').disabled=!yes;$('driveConnect').disabled=yes;}
+function setConnected(yes){$('driveSync').disabled=!yes;$('driveDisconnect').disabled=!yes;$('driveConnect').disabled=yes;$('driveForceUpload').disabled=!yes;}
 function validate(x){if(!Array.isArray(x)||x.length>100000)throw Error('Invalid transaction array');if(typeof validEntries!=='function'||!validEntries(x))throw Error('Invalid transaction records');calculate(x);}
 async function api(path,options={}){const response=await fetch('https://www.googleapis.com/drive/v3/'+path,{...options,headers:{Authorization:'Bearer '+token,...(options.headers||{})}});if(!response.ok){if(response.status===401){token=null;setConnected(false)}throw Error('Google Drive '+response.status+': '+(await response.text()).slice(0,180))}return response;}
 async function findFile(){const q=encodeURIComponent("name = '"+FILE+"' and 'appDataFolder' in parents and trashed = false");const r=await api('files?spaces=appDataFolder&fields=nextPageToken,files(id,name,modifiedTime)&page_size=100&q='+q);const j=await r.json();if((j.files||[]).length>1)throw Error('Multiple cloud data files found; refusing to sync.');return (j.files||[])[0]||null;}
 async function downloadFile(id){const r=await api('files/'+encodeURIComponent(id)+'?alt=media');const j=await r.json();if(j.app!=='Infinity Bourbon'||j.schemaVersion!==1)throw Error('Unexpected cloud file format');validate(j.transactions);return j.transactions;}
 async function uploadFile(file,items){validate(items);const payload=JSON.stringify({app:'Infinity Bourbon',schemaVersion:1,updatedAt:new Date().toISOString(),transactions:items});if(file){const response=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(file.id)+'?uploadType=media&fields=id,size,md5Checksum',{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:payload});if(!response.ok)throw Error('Cloud update failed: '+response.status+' '+(await response.text()).slice(0,180));const uploaded=await response.json();if(!uploaded.id)throw Error('Cloud update did not return a file ID');const check=await downloadFile(file.id);if(serial(check)!==serial(items))throw Error('Cloud verification failed: uploaded records do not match.');}else{const boundary='ib'+Date.now();const meta=JSON.stringify({name:FILE,parents:['appDataFolder'],mimeType:'application/json'});const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+payload+'\r\n--'+boundary+'--';const response=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'multipart/related; boundary='+boundary},body});if(!response.ok)throw Error('Upload failed: '+response.status+' '+(await response.text()).slice(0,120));const created=await response.json();if(!created.id)throw Error('Cloud creation returned no file ID');const check=await downloadFile(created.id);if(serial(check)!==serial(items))throw Error('First cloud upload verification failed');}}
-async function sync(){if(busy||!token)return;busy=true;$('driveSync').disabled=true;status('Checking private Drive folder…');try{const local=current();validate(local);const file=await findFile();if(!file){await uploadFile(null,local);setBase(local);status('First backup uploaded to private Google Drive. In sync.');return;}
+async function sync(){if(busy||!token)return;busy=true;$('driveSync').disabled=true;$('driveForceUpload').disabled=true;status('Checking private Drive folder…');try{const local=current();validate(local);const file=await findFile();if(!file){await uploadFile(null,local);setBase(local);status('First backup uploaded to private Google Drive. In sync.');return;}
 const remote=await downloadFile(file.id),l=serial(local),r=serial(remote),b=base();
 if(l===r){setBase(local);status('In sync. No changes needed. Local and cloud: '+counts(local)+'.');return;}
 if(b===r){await uploadFile(file,local);setBase(local);status('Upload verified. In sync. Local and cloud: '+counts(local)+'.');return;}
 if(b===l){status('Cloud differs. Local: '+counts(local)+'; cloud: '+counts(remote)+'. No changes made.');if(confirm('Cloud differs from this device. Local: '+counts(local)+'; cloud: '+counts(remote)+'. Replace LOCAL records with cloud records? Only proceed if you have exported a JSON backup and verified the cloud copy is the one you want.')){save(remote);setBase(remote);status('Cloud records downloaded. In sync: '+counts(remote)+'.');}else status('Download canceled. Local: '+counts(local)+'; cloud: '+counts(remote)+'. No records changed.');return;}
 status('Conflict. Local: '+counts(local)+'; cloud: '+counts(remote)+'. Baseline: '+(b===null?'missing': 'different from both')+'. No changes made. Export backups before resolving.');
-}catch(e){status('Sync stopped safely: '+e.message)}finally{busy=false;$('driveSync').disabled=!token;}}
+}catch(e){status('Sync stopped safely: '+e.message)}finally{busy=false;$('driveSync').disabled=!token;$('driveForceUpload').disabled=!token;}}
 $('driveConnect').onclick=()=>{const id=window.INFINITY_BOURBON_GOOGLE_CLIENT_ID;if(!id||id.startsWith('PASTE_')){status('Google Cloud setup required: enter your OAuth Web client ID in drive-config.js.');return;}if(!window.google?.accounts?.oauth2){status('Google sign-in unavailable. Connect to the internet and retry.');return;}tokenClient=google.accounts.oauth2.initTokenClient({client_id:id,scope:SCOPE,callback:res=>{if(res.error){status('Google sign-in failed: '+res.error);return;}token=res.access_token;setConnected(true);status('Connected. Tap Sync now to compare local and cloud records.')}});tokenClient.requestAccessToken({prompt:'consent'});};
+
+// Explicit recovery action. Never alter the local transactions here.
+async function restoreCloudFromLocal(){
+ if(busy||!token)return;
+ busy=true;$('driveSync').disabled=true;$('driveForceUpload').disabled=true;
+ status('Inspecting cloud before recovery upload…');
+ try{
+  const local=current();validate(local);
+  const file=await findFile();
+  const remote=file?await downloadFile(file.id):null;
+  const snapshot=serial(local);
+  if(remote!==null&&serial(remote)===snapshot){setBase(local);status('Already in sync. Local and cloud: '+counts(local)+'.');return;}
+  const detail='LOCAL: '+counts(local)+'; CLOUD: '+(remote===null?'no existing backup':counts(remote))+'.';
+  if(!confirm('RECOVERY UPLOAD: '+detail+'\n\nReplace the CLOUD backup with this device’s LOCAL transactions? This does not change local data. Make sure you have exported JSON backups of both devices.')){status('Recovery upload canceled. '+detail);return;}
+  if(!confirm('Final confirmation: overwrite the Google Drive backup with '+counts(local)+' from this device? The previous cloud history will be replaced.')){status('Recovery upload canceled.');return;}
+  if(serial(current())!==snapshot)throw Error('Local data changed during confirmation. Retry.');
+  // Abort if cloud changed after the preview; not an atomic lock against concurrent devices.
+  const latestFile=await findFile();
+  if((latestFile?.id||null)!==(file?.id||null))throw Error('Cloud file changed since preview. Retry.');
+  if(file){const latest=await downloadFile(file.id);if(serial(latest)!==serial(remote))throw Error('Cloud records changed since preview. Retry.');}
+  status('Uploading local recovery copy and verifying…');
+  await uploadFile(file,local);
+  if(serial(current())!==snapshot)throw Error('Local data changed during upload; cloud was updated, but local baseline was not changed. Recheck before syncing.');
+  // uploadFile verifies content by downloading it back.
+  setBase(local);
+  status('Recovery upload VERIFIED. In sync. Local and cloud: '+counts(local)+'.');
+ }catch(e){status('Recovery stopped: '+e.message)}
+ finally{busy=false;$('driveSync').disabled=!token;$('driveForceUpload').disabled=!token;}
+}
+$('driveForceUpload').onclick=restoreCloudFromLocal;
+
 $('driveSync').onclick=sync;
 $('driveDisconnect').onclick=()=>{if(token&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(token,()=>{});token=null;setConnected(false);status('Disconnected. Local records preserved.');};
 })();
