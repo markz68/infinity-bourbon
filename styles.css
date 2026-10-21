@@ -10,3 +10,6 @@
 .backup-stack button{width:100%;font-size:13px;padding:12px 14px}.backup-stack button:disabled,.backup-advanced button:disabled{opacity:.48;cursor:not-allowed}
 .backup-advanced{border-top:1px solid #eee7f0;padding-top:14px}.backup-advanced summary{font-size:13px;font-weight:650;color:#663485;cursor:pointer}.backup-advanced button{width:100%;font-size:12px;padding:12px;margin-top:8px}
 .backup-footer{text-align:center;margin:18px 0 0}@media(max-width:420px){.backup-dialog-content{padding:20px}.sync-card-row{align-items:flex-start}.sync-local-label{font-size:11px}}
+
+/* Keep the native import file input hidden until Import JSON is selected. */
+input[type="file"][hidden]{display:none!important}
