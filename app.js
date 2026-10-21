@@ -34,5 +34,10 @@ function download(filename,content,type){const url=URL.createObjectURL(new Blob(
 $('exportJson').onclick=()=>download('infinity-bourbon-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:'Infinity Bourbon',schemaVersion:1,exportedAt:new Date().toISOString(),transactions:entries},null,2),'application/json');
 $('exportCsv').onclick=()=>{const fields=['type','date','name','amount','proof','note'];const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';const csv=[fields.join(','),...entries.map(e=>fields.map(k=>q(e[k])).join(','))].join('\r\n');download('infinity-bourbon-history.csv','\ufeff'+csv,'text/csv;charset=utf-8');};
 $('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('File is too large');const data=JSON.parse(await file.text());if(data.app!=='Infinity Bourbon'||data.schemaVersion!==1||!validEntries(data.transactions))throw Error('Not a valid Infinity Bourbon backup');calculate(data.transactions);if(confirm('Replace all current entries with '+data.transactions.length+' imported transactions? Export a backup first if needed.')){save(data.transactions);toast('Backup imported');}}catch(err){alert('Import failed: '+err.message);}finally{e.target.value='';}};
-$('backupTop').onclick=()=>document.querySelector('.backup-buttons').scrollIntoView({behavior:'smooth'});
+const backupDialog=$('backupDialog');
+const openBackup=()=>{if(!backupDialog.open)backupDialog.showModal();};
+$('backupTop').onclick=openBackup;
+$('settingsTop').onclick=openBackup;
+$('closeBackup').onclick=()=>backupDialog.close();
+backupDialog.addEventListener('click',e=>{if(e.target===backupDialog)backupDialog.close();});
 render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
