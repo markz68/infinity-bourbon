@@ -13,3 +13,19 @@
 
 /* Keep the native import file input hidden until Import JSON is selected. */
 input[type="file"][hidden]{display:none!important}
+
+/* v1.3.2: accessible custom Undo Last confirmation */
+.confirm-dialog{width:min(92vw,440px);border:1px solid #e5d8eb;background:#fff;color:#2d2234;border-radius:18px}
+.confirm-content{padding:24px}
+.confirm-eyebrow{color:#81519c;font-size:11px;font-weight:800;letter-spacing:1.4px}
+.confirm-content h2{color:#512276;font-size:22px;margin:8px 0 12px}
+.confirm-record{display:flex;flex-direction:column;gap:6px;background:#f8f4fa;border:1px solid #e6dceb;border-radius:12px;padding:15px;margin:18px 0;color:#392844}
+.confirm-record strong{font-size:16px;overflow-wrap:anywhere}
+.confirm-record span{font-size:13px}
+.confirm-warning{font-size:13px;color:#9b2735;font-weight:700;margin:12px 0 18px}
+.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.confirm-actions button{min-height:46px;border-radius:11px;padding:10px;font-weight:700}
+.danger-btn{background:#a32e3d;color:#fff;border:1px solid #842432}
+.danger-btn:hover{background:#872534}
+.confirm-actions button:focus-visible{outline:3px solid #a16bc7;outline-offset:3px}
+@media(max-width:380px){.confirm-actions{grid-template-columns:1fr}}
