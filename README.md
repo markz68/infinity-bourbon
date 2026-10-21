@@ -1,6 +1,6 @@
 # Infinity Bourbon
 
-**Current release: v1.3.0**
+**Current release: v1.3.1**
 
 Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for tracking a personal infinity bottle of bourbon. It runs in modern browsers on Android and Windows, and can be installed on supported devices.
 
@@ -11,7 +11,7 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 - Records bourbon additions with whiskey name, proof, amount in US fluid ounces, date, and optional note.
 - Records pours and calculates the remaining volume and estimated weighted-average proof (plus ABV).
 - Shows the bottle composition and transaction history.
-- Provides **Undo last** with a confirmation prompt.
+- Provides **Undo last** with a confirmation that names the exact transaction.\n- Starts new installations with an **empty bottle** and provides a two-confirmation **Start New Bottle** action in Backup & Sync → Bottle management.
 - Stores transactions locally for offline use.
 - Exports restorable JSON backups and CSV files for spreadsheets.
 - Imports a JSON backup after explicit confirmation.
@@ -48,7 +48,7 @@ Google Drive sync is optional and **manual**, not automatic. It uses the `drive.
 
 Connecting to Google may need to be repeated after a browser or app restart. Sync requires an internet connection.
 
-## Data safety and important limitations
+## Data safety and important limitations\n\n- **Start New Bottle** clears the current device's transaction history after two confirmations. Export a JSON backup first. Syncing afterward can replace the cloud history with the empty bottle.
 
 - The working transaction history is stored in the browser's `localStorage`. **Do not clear site data or uninstall the PWA without a verified JSON backup.** Browser profiles or devices may have different local histories.
 - Google Drive sync is **not** an automatic, continuous backup. Sync deliberately when switching devices and retain independent JSON backups.
@@ -56,7 +56,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 - Transactions are applied in **entry order**, not automatically sorted by date. The date is descriptive; enter historical transactions chronologically.
 - **Undo last** removes only the most recently entered transaction and asks for confirmation. There is no arbitrary transaction editing feature.
 - Bottle proof assumes uniform mixing and ideal volumes; it is an estimate, not a laboratory measurement.
-- The original recovered seven additions total **9.0 US fl oz**, approximately **96.583 proof** (**48.292% ABV**).
+- The original recovered seven additions total **9.0 US fl oz**, approximately **96.583 proof** (**48.292% ABV**). They are no longer preloaded for new users; existing locally saved histories are preserved during upgrade.
 - Static PWA changes require updating the cache identifier in `sw.js`. A browser may briefly continue using older cached files until its service worker updates.
 
 ## Release history
@@ -66,7 +66,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 | **1.0.0** | Initial offline-first PWA, recovered seven-entry history, local tracking, JSON backup, and CSV export. |
 | **1.2.x** | Added and refined manual Google Drive synchronization, safer conflict handling, and verified recovery upload. |
 | **1.2.3** | Confirmed successful two-way synchronization between Android and Windows. |
-| **1.3.0** | Replaced large backup and sync panels with a compact **Backup & Sync** popup inspired by the Milestones app; preserved existing sync behavior. |
+| **1.3.1** | New installations start empty; added two-confirmation Start New Bottle and transaction-specific Undo Last prompt. |\n| **1.3.0** | Replaced large backup and sync panels with a compact **Backup & Sync** popup inspired by the Milestones app; preserved existing sync behavior. |
 
 ## Planned improvements
 
