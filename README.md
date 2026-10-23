@@ -1,6 +1,6 @@
 # Infinity Bourbon
 
-**Current release: v1.3.2**
+**Current release: v1.3.3**
 
 Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for tracking a personal infinity bottle of bourbon. It runs in modern browsers on Android and Windows, and can be installed on supported devices.
 
@@ -12,12 +12,12 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 - Records pours and calculates the remaining volume and estimated weighted-average proof (plus ABV).
 - Shows the bottle composition and transaction history.
 - Provides **Undo last** with a confirmation that names the exact transaction.
-- Starts new installations with an **empty bottle** and provides a two-confirmation **Start New Bottle** action in Backup & Sync → Bottle management.
+- Starts new installations with an **empty bottle** and provides a two-confirmation **Start New Bottle** action in Settings → Bottle management.
 - Stores transactions locally for offline use.
 - Exports restorable JSON backups and CSV files for spreadsheets.
 - Imports a JSON backup after explicit confirmation.
 - Offers **manual Google Drive synchronization** between devices using Google's private application-data folder.
-- Groups backups and sync controls in a compact **Backup & Sync** popup (v1.3.0).
+- Provides a single top-right **Settings** gear for Google Drive sync, JSON backup/restore, CSV export, bottle management, and advanced recovery. No duplicate Backup & Sync button on the main screen.
 
 ## Install and use
 
@@ -27,9 +27,9 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 4. Add bourbon or record pours. Enter the **proof printed on the bottle**; the app calculates ABV automatically.
 5. Export a **JSON backup** periodically and keep a copy outside the browser.
 
-## Backup & Sync (v1.3.0)
+## Settings: backup, restore, and synchronization
 
-Open **Backup & Sync** from the main screen or the settings icon.
+Open **Settings** using the gear in the top-right header on Android or Windows. The main screen has no separate Backup & Sync button. Scroll inside Settings to find Local backups, Bottle management, and Advanced recovery. The app version appears in the main footer and at the bottom of Settings.
 
 ### Local backups
 
@@ -41,13 +41,19 @@ Open **Backup & Sync** from the main screen or the settings icon.
 
 Google Drive sync is optional and **manual**, not automatic. It uses the `drive.appdata` permission to store a backup in a private application-data folder.
 
-1. Open **Backup & Sync** and select **Connect Google Drive**.
+1. Open **Settings** and select **Connect Google Drive**.
 2. Select **Sync now** to compare this device's local history with the cloud history.
 3. Before switching devices, sync the device you were using. On the other device, sync **before editing**, and sync again after making changes.
 4. Read confirmation dialogs carefully. If the local and cloud histories conflict, the app avoids silently overwriting either copy.
 5. **Advanced recovery** contains an explicit recovery upload that can overwrite the cloud history after two confirmations. Use it only when you understand which copy should be kept and have exported backups.
 
-Connecting to Google may need to be repeated after a browser or app restart. Sync requires an internet connection.
+Connecting to Google may need to be repeated after a browser or app restart. Sync requires an internet connection. A UI update does not revoke the current Google OAuth token, but token expiry or browser restarts may still require reconnection.
+
+## Updating and troubleshooting
+
+- On Android or Windows, reopen or refresh the installed app after deployment. If the old layout persists, allow the service worker to update and reopen the app. Do not clear browser/site data to force an update.
+- Check for **v1.3.3** in the footer. Use the top-right gear for all backup and sync operations.
+- The current Drive connection status appears inside Settings. A connection may need renewing independently of an app update.
 
 ## Data safety and important limitations
 
@@ -69,6 +75,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 | **1.0.0** | Initial offline-first PWA, recovered seven-entry history, local tracking, JSON backup, and CSV export. |
 | **1.2.x** | Added and refined manual Google Drive synchronization, safer conflict handling, and verified recovery upload. |
 | **1.2.3** | Confirmed successful two-way synchronization between Android and Windows. |
+| **1.3.3** | Standardized the top-right Settings gear as the only backup/sync entry point, removed the redundant main-screen button, retained all existing controls and Drive code, added a discreet version footer, and bumped the offline cache. |
 | **1.3.2** | Replaced native Undo Last confirmation with a high-contrast, branded dialog and clear Cancel / Remove Transaction buttons. |
 | **1.3.1** | New installations start empty; added two-confirmation Start New Bottle and transaction-specific Undo Last prompt. |
 | **1.3.0** | Replaced large backup and sync panels with a compact **Backup & Sync** popup inspired by the Milestones app; preserved existing sync behavior. |
