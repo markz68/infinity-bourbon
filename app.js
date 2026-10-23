@@ -33,7 +33,6 @@ $('exportCsv').onclick=()=>{const fields=['type','date','name','amount','proof',
 $('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('File is too large');const data=JSON.parse(await file.text());if(data.app!=='Infinity Bourbon'||data.schemaVersion!==1||!validEntries(data.transactions))throw Error('Not a valid Infinity Bourbon backup');calculate(data.transactions);if(confirm('Replace all current entries with '+data.transactions.length+' imported transactions? Export a backup first if needed.')){save(data.transactions);toast('Backup imported');}}catch(err){alert('Import failed: '+err.message);}finally{e.target.value='';}};
 const backupDialog=$('backupDialog');
 const openBackup=()=>{if(!backupDialog.open)backupDialog.showModal();};
-$('backupTop').onclick=openBackup;
 $('settingsTop').onclick=openBackup;
 $('closeBackup').onclick=()=>backupDialog.close();
 backupDialog.addEventListener('click',e=>{if(e.target===backupDialog)backupDialog.close();});
