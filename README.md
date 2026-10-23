@@ -1,6 +1,6 @@
 # Infinity Bourbon
 
-**Current release: v1.3.3**
+**Current release: v1.3.4**
 
 Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for tracking a personal infinity bottle of bourbon. It runs in modern browsers on Android and Windows, and can be installed on supported devices.
 
@@ -51,8 +51,8 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 
 ## Updating and troubleshooting
 
-- On Android or Windows, reopen or refresh the installed app after deployment. If the old layout persists, allow the service worker to update and reopen the app. Do not clear browser/site data to force an update.
-- Check for **v1.3.3** in the footer. Use the top-right gear for all backup and sync operations.
+- On Android or Windows, reopen or refresh the installed app after deployment. If the old layout persists, allow the service worker to update and reopen the app. A mixed cache of old JavaScript and new HTML could cause v1.3.3 to show empty default values and an unresponsive gear; v1.3.4 includes a compatibility hook to prevent this startup failure. Do not clear browser/site data to force an update.
+- Check for **v1.3.4** in the footer. Use the top-right gear for all backup and sync operations.
 - The current Drive connection status appears inside Settings. A connection may need renewing independently of an app update.
 
 ## Data safety and important limitations
@@ -76,6 +76,8 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 | **1.2.x** | Added and refined manual Google Drive synchronization, safer conflict handling, and verified recovery upload. |
 | **1.2.3** | Confirmed successful two-way synchronization between Android and Windows. |
 | **1.3.3** | Standardized the top-right Settings gear as the only backup/sync entry point, removed the redundant main-screen button, retained all existing controls and Drive code, added a discreet version footer, and bumped the offline cache. |
+| **1.3.4** | Compatibility hotfix: added an invisible legacy button hook so an older cached script does not stop startup when paired with the new Settings layout. No data or sync changes. |
+| **1.3.3** | Standardized Settings entry point and removed visible redundant backup button. |
 | **1.3.2** | Replaced native Undo Last confirmation with a high-contrast, branded dialog and clear Cancel / Remove Transaction buttons. |
 | **1.3.1** | New installations start empty; added two-confirmation Start New Bottle and transaction-specific Undo Last prompt. |
 | **1.3.0** | Replaced large backup and sync panels with a compact **Backup & Sync** popup inspired by the Milestones app; preserved existing sync behavior. |
