@@ -33,3 +33,7 @@ input[type="file"][hidden]{display:none!important}
 .icon-btn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
 .icon-btn:focus-visible,.backup-close:focus-visible,.backup-advanced summary:focus-visible{outline:3px solid #d8a9f4;outline-offset:3px}
 .app-footer{max-width:740px;margin:0 auto;padding:0 20px 28px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#766e7c;font-size:12px}
+
+/* v1.3.7: Milestones-style version beneath app title */
+.brand .header-version{display:block;margin-top:2px;color:#f0ddfa;font-size:12px;font-weight:650;line-height:1.3}
+.brand small{margin-top:3px}
