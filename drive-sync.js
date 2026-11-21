@@ -52,7 +52,7 @@ async function restoreCloudFromLocal(){
   setBase(local);
   status('Recovery upload VERIFIED. In sync. Local and cloud: '+counts(local)+'.');
  }catch(e){status('Recovery stopped: '+e.message)}
- finally{busy=false;$('driveSync').disabled=!token;$('driveForceUpload').disabled=!token;}
+ finally{busy=false;setConnected(!!token);}
 }
 $('driveForceUpload').onclick=restoreCloudFromLocal;
 
@@ -68,7 +68,7 @@ async function restoreLocalFromCloud(){
   const before=serial(local),incoming=serial(remote);
   if(before===incoming){setBase(remote);status('Already matches Google Drive: '+counts(remote)+'.');return;}
   const detail='THIS DEVICE: '+counts(local)+'; GOOGLE DRIVE: '+counts(remote)+'.';
-  if(!confirm('RESTORE FROM GOOGLE DRIVE\\n\\n'+detail+'\\n\\nReplace the history on this device with the Google Drive backup? The Google Drive copy will not change. Export a JSON backup first if you need to preserve this device’s records.')){
+  if(!confirm('RESTORE FROM GOOGLE DRIVE\n\n'+detail+'\n\nReplace the history on this device with the Google Drive backup? The Google Drive copy will not change. Export a JSON backup first if you need to preserve this device’s records.')){
    status('Restore canceled. '+detail+' No changes made.');return;
   }
   if(serial(current())!==before)throw Error('Local history changed during confirmation. Retry.');
