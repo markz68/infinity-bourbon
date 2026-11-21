@@ -1,6 +1,6 @@
 # Infinity Bourbon
 
-**Current release: v1.3.6**
+**Current release: v1.3.7**
 
 Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for tracking a personal infinity bottle of bourbon. It runs in modern browsers on Android and Windows, and can be installed on supported devices.
 
@@ -18,6 +18,7 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 - Imports a JSON backup after explicit confirmation.
 - Offers **manual Google Drive synchronization** between devices using Google's private application-data folder.
 - Provides explicit **Restore from Google Drive** (cloud to this device) and **Back Up to Google Drive** (this device to cloud) actions with confirmations and safety checks.
+- Shows the current app version beneath the title in the header, as in Milestones.
 - Provides a single top-right **Settings** gear for Google Drive sync, JSON backup/restore, CSV export, bottle management, and advanced recovery. No duplicate Backup & Sync button on the main screen.
 
 ## Install and use
@@ -55,7 +56,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 ## Updating and troubleshooting
 
 - On Android or Windows, reopen or refresh the installed app after deployment. If the old layout persists, allow the service worker to update and reopen the app. A mixed cache of old JavaScript and new HTML could cause v1.3.3 to show empty default values and an unresponsive gear; v1.3.6 includes a compatibility hook to prevent this startup failure. Do not clear browser/site data to force an update.
-- Check for **v1.3.6** in the footer. Use the top-right gear for all backup and sync operations.
+- Check for **v1.3.7** beneath the app name in the header (and in the footer). Use the top-right gear for all backup and sync operations.
 - The current Drive connection status appears inside Settings. A connection may need renewing independently of an app update.
 
 ## Data safety and important limitations
@@ -79,6 +80,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 | **1.2.x** | Added and refined manual Google Drive synchronization, safer conflict handling, and verified recovery upload. |
 | **1.2.3** | Confirmed successful two-way synchronization between Android and Windows. |
 | **1.3.5** | Service worker now checks the network for updated app files and falls back to cached files offline; addresses stale versions at the normal URL. |
+| **1.3.7** | Added the current version beneath the app name in the header, matching the Milestones layout while retaining the purple theme. |
 | **1.3.6** | Added explicit Google Drive restore and backup actions, including fresh-install restore, record-count previews, overwrite confirmations, and cloud-change checks. |
 | **1.3.4** | Compatibility hook for older cached scripts to avoid a blank startup. |
 | **1.3.3** | Standardized the top-right Settings gear as the only backup/sync entry point, removed the redundant main-screen button, retained all existing controls and Drive code, added a discreet version footer, and bumped the offline cache. |
