@@ -11,7 +11,7 @@ const counts=x=>{const additions=x.filter(e=>e.type==='add').length;return `${x.
 // Legacy v1.2.1 baseline is raw JSON; normalize it when reading.
 const base=()=>{const raw=localStorage.getItem(BASE);if(raw===null)return null;try{const data=JSON.parse(raw);return Array.isArray(data)?serial(data):null;}catch{return null;}};
 const setBase=x=>localStorage.setItem(BASE,serial(x));
-function setConnected(yes){$('driveSync').disabled=!yes;$('driveDisconnect').disabled=!yes;$('driveConnect').disabled=yes;$('driveForceUpload').disabled=!yes;}
+function setConnected(yes){for(const id of ['driveSync','driveRestore','driveBackup','driveForceUpload'])$(id).disabled=!yes||busy;$('driveDisconnect').disabled=!yes;$('driveConnect').disabled=yes;}
 function validate(x){if(!Array.isArray(x)||x.length>100000)throw Error('Invalid transaction array');if(typeof validEntries!=='function'||!validEntries(x))throw Error('Invalid transaction records');calculate(x);}
 async function api(path,options={}){const response=await fetch('https://www.googleapis.com/drive/v3/'+path,{...options,headers:{Authorization:'Bearer '+token,...(options.headers||{})}});if(!response.ok){if(response.status===401){token=null;setConnected(false)}throw Error('Google Drive '+response.status+': '+(await response.text()).slice(0,180))}return response;}
 async function findFile(){const q=encodeURIComponent("name = '"+FILE+"' and 'appDataFolder' in parents and trashed = false");const r=await api('files?spaces=appDataFolder&fields=nextPageToken,files(id,name,modifiedTime)&page_size=100&q='+q);const j=await r.json();if((j.files||[]).length>1)throw Error('Multiple cloud data files found; refusing to sync.');return (j.files||[])[0]||null;}
@@ -23,7 +23,7 @@ if(l===r){setBase(local);status('In sync. No changes needed. Local and cloud: '+
 if(b===r){await uploadFile(file,local);setBase(local);status('Upload verified. In sync. Local and cloud: '+counts(local)+'.');return;}
 if(b===l){status('Cloud differs. Local: '+counts(local)+'; cloud: '+counts(remote)+'. No changes made.');if(confirm('Cloud differs from this device. Local: '+counts(local)+'; cloud: '+counts(remote)+'. Replace LOCAL records with cloud records? Only proceed if you have exported a JSON backup and verified the cloud copy is the one you want.')){save(remote);setBase(remote);status('Cloud records downloaded. In sync: '+counts(remote)+'.');}else status('Download canceled. Local: '+counts(local)+'; cloud: '+counts(remote)+'. No records changed.');return;}
 status('Conflict. Local: '+counts(local)+'; cloud: '+counts(remote)+'. Baseline: '+(b===null?'missing': 'different from both')+'. No changes made. Export backups before resolving.');
-}catch(e){status('Sync stopped safely: '+e.message)}finally{busy=false;$('driveSync').disabled=!token;$('driveForceUpload').disabled=!token;}}
+}catch(e){status('Sync stopped safely: '+e.message)}finally{busy=false;setConnected(!!token);}}
 $('driveConnect').onclick=()=>{const id=window.INFINITY_BOURBON_GOOGLE_CLIENT_ID;if(!id||id.startsWith('PASTE_')){status('Google Cloud setup required: enter your OAuth Web client ID in drive-config.js.');return;}if(!window.google?.accounts?.oauth2){status('Google sign-in unavailable. Connect to the internet and retry.');return;}tokenClient=google.accounts.oauth2.initTokenClient({client_id:id,scope:SCOPE,callback:res=>{if(res.error){status('Google sign-in failed: '+res.error);return;}token=res.access_token;setConnected(true);status('Connected. Tap Sync now to compare local and cloud records.')}});tokenClient.requestAccessToken({prompt:'consent'});};
 
 // Explicit recovery action. Never alter the local transactions here.
@@ -55,6 +55,36 @@ async function restoreCloudFromLocal(){
  finally{busy=false;$('driveSync').disabled=!token;$('driveForceUpload').disabled=!token;}
 }
 $('driveForceUpload').onclick=restoreCloudFromLocal;
+
+// Explicit direction controls. Never infer overwrite direction from a missing sync baseline.
+async function restoreLocalFromCloud(){
+ if(busy||!token)return;
+ busy=true;setConnected(true);status('Checking Google Drive backup for restore…');
+ try{
+  const local=current();validate(local);
+  const file=await findFile();
+  if(!file){status('No Google Drive backup found. Local history unchanged.');return;}
+  const remote=await downloadFile(file.id);
+  const before=serial(local),incoming=serial(remote);
+  if(before===incoming){setBase(remote);status('Already matches Google Drive: '+counts(remote)+'.');return;}
+  const detail='THIS DEVICE: '+counts(local)+'; GOOGLE DRIVE: '+counts(remote)+'.';
+  if(!confirm('RESTORE FROM GOOGLE DRIVE\\n\\n'+detail+'\\n\\nReplace the history on this device with the Google Drive backup? The Google Drive copy will not change. Export a JSON backup first if you need to preserve this device’s records.')){
+   status('Restore canceled. '+detail+' No changes made.');return;
+  }
+  if(serial(current())!==before)throw Error('Local history changed during confirmation. Retry.');
+  const latest=await findFile();
+  if(!latest||latest.id!==file.id)throw Error('Google Drive backup changed. Retry.');
+  const verified=await downloadFile(file.id);
+  if(serial(verified)!==incoming)throw Error('Google Drive records changed. Retry.');
+  save(verified);
+  setBase(verified);
+  status('Restore complete. This device now has '+counts(verified)+'. Google Drive unchanged.');
+ }catch(e){status('Restore stopped safely: '+e.message);}
+ finally{busy=false;setConnected(!!token);}
+}
+$('driveRestore').onclick=restoreLocalFromCloud;
+$('driveBackup').onclick=restoreCloudFromLocal;
+
 
 $('driveSync').onclick=sync;
 $('driveDisconnect').onclick=()=>{if(token&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(token,()=>{});token=null;setConnected(false);status('Disconnected. Local records preserved.');};
