@@ -1,5 +1,5 @@
 /* v1.3.5: network-first same-origin updates, offline fallback. */
-const CACHE='infinity-bourbon-static-v1-3-5';
+const CACHE='infinity-bourbon-static-v1-3-6';
 const PREFIX='infinity-bourbon-static-';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./drive-sync.js','./drive-config.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
