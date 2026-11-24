@@ -94,7 +94,12 @@ $('settingsTop').onclick=()=>backupDialog.showModal();
 $('closeBackup').onclick=$('settingsDone').onclick=()=>backupDialog.close();
 $('openBackupTools').onclick=()=>backupTools.showModal();
 $('backToSettings').onclick=$('backupDone').onclick=()=>backupTools.close();
-for(const dialog of [backupDialog,backupTools]){
+const aboutDialog=$('aboutDialog');
+if(aboutDialog){
+ $('openAbout').onclick=()=>aboutDialog.showModal();
+ $('closeAbout').onclick=$('aboutDone').onclick=()=>aboutDialog.close();
+}
+for(const dialog of [backupDialog,backupTools,aboutDialog].filter(Boolean)){
  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
 }
 render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

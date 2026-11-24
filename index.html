@@ -1,23 +1,52 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#512276"><meta name="description" content="Offline-first infinity bourbon bottle tracker"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><link rel="stylesheet" href="./styles.css?v=1.3.8"><title>Infinity Bourbon</title></head>
-<body><header><div class="header-inner"><div class="brand"><span class="brand-icon">◈</span><div><strong>Infinity Bourbon</strong><span class="header-version">v1.3.8</span><small>My forever blend</small></div></div><button id="settingsTop" class="icon-btn" aria-label="Open Settings" title="Settings" type="button">⚙</button></div></header>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#512276"><meta name="description" content="Offline-first infinity bourbon bottle tracker"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><link rel="stylesheet" href="./styles.css?v=1.3.9"><title>Infinity Bourbon</title><script src="./theme.js?v=1.3.9"></script></head>
+<body><header><div class="header-inner"><div class="brand"><span class="brand-icon">◈</span><div><strong>Infinity Bourbon</strong><span class="header-version">v1.3.9</span><small>My forever blend</small></div></div><button id="settingsTop" class="icon-btn" aria-label="Settings" title="Settings" type="button"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2 14 2 14.6 4.4 16.4 5.4 18.8 4.7 20.8 8.2 19 9.9 19 12.1 20.8 13.8 18.8 17.3 16.4 16.6 14.6 17.6 14 20 10 20 9.4 17.6 7.6 16.6 5.2 17.3 3.2 13.8 5 12.1 5 9.9 3.2 8.2 5.2 4.7 7.6 5.4 9.4 4.4 10 2Z" transform="translate(0 1)"/><circle cx="12" cy="12" r="3.2"/></svg></button></div></header>
 <main><section class="hero"><div class="eyebrow">CURRENT BLEND</div><div class="proof"><span id="proof">0</span><span class="proof-unit">proof</span></div><div id="abv" class="abv">0% ABV</div><div class="stats"><div><b id="volume">0 oz</b><span>Volume</span></div><div><b id="additions">0</b><span>Additions</span></div><div><b id="pours">0</b><span>Pours</span></div></div></section>
 <div class="actions"><button class="primary" id="addBtn">＋ Add bourbon</button><button class="secondary" id="pourBtn">◧ Record pour</button></div>
 <section class="panel"><div class="section-heading"><h2>What's in your bottle</h2><span id="blendCount" class="muted"></span></div><div id="composition"></div></section>
 <section class="panel"><div class="section-heading"><h2>History</h2><button class="text-btn" id="undoBtn">Undo last</button></div><div id="history"></div></section>
-</main><button id="backupTop" type="button" hidden aria-hidden="true" tabindex="-1"></button><footer class="app-footer"><span>Saved on this device</span><span>Infinity Bourbon · v1.3.8</span></footer>
+</main><button id="backupTop" type="button" hidden aria-hidden="true" tabindex="-1"></button><footer class="app-footer"><span>Saved on this device</span><span>Infinity Bourbon · v1.3.9</span></footer>
 <dialog id="backupDialog" class="backup-dialog" aria-labelledby="backupTitle">
 <div class="backup-dialog-content">
   <div class="backup-dialog-header">
     <div><h2 id="backupTitle">Settings</h2></div>
     <button type="button" id="closeBackup" class="backup-close" aria-label="Close Settings">×</button>
   </div>
-  <button id="openBackupTools" class="secondary" type="button">Backup &amp; Restore</button>
+  <div class="backup-stack">
+    <button id="openBackupTools" class="secondary" type="button">Backup &amp; Restore</button>
+    <button id="openAbout" class="secondary" type="button">About</button>
+  </div>
+  <fieldset class="theme-options">
+    <legend>Theme</legend>
+    <label><input type="radio" name="theme" value="system" checked> Use device setting</label>
+    <label><input type="radio" name="theme" value="light"> Light</label>
+    <label><input type="radio" name="theme" value="dark"> Dark</label>
+    <p id="theme-status" role="status"></p>
+  </fieldset>
   <details class="backup-advanced"><summary>Bottle management</summary>
     <p class="muted tiny">Start a new empty bottle on this device. Export a backup file first.</p>
     <button id="newBottleBtn" class="secondary" type="button">Start New Bottle</button>
   </details>
   <div class="backup-footer"><button id="settingsDone" class="secondary" type="button">Done</button></div>
+</div>
+</dialog>
+<dialog id="aboutDialog" class="backup-dialog" aria-labelledby="aboutTitle">
+<div class="backup-dialog-content">
+  <div class="backup-dialog-header">
+    <h2 id="aboutTitle">About</h2>
+    <button id="closeAbout" type="button" class="backup-close" aria-label="Back to Settings">×</button>
+  </div>
+  <h3>Infinity Bourbon</h3>
+  <p class="muted">v1.3.9</p>
+  <p>Track whiskey additions and pours, see what’s in your infinity bottle, and estimate its current proof.</p>
+  <h3>Your Data</h3>
+  <p>Bottle history is saved in this browser. After the first online load, you can track your bottle and export or restore JSON offline. JSON is the restorable backup, and CSV is for spreadsheets. Google Drive backup and manual sync are optional and require an internet connection.</p>
+  <nav class="about-links" aria-label="App information">
+    <a href="./about.html">More Apps</a>
+    <a href="https://markz68.github.io/milestones/privacy.html" target="_blank" rel="noopener">Privacy</a>
+    <a href="https://markz68.github.io/milestones/terms.html" target="_blank" rel="noopener">Terms</a>
+  </nav>
+  <div class="backup-footer"><button id="aboutDone" class="secondary" type="button">Done</button></div>
 </div>
 </dialog>
 <dialog id="backupTools" class="backup-dialog" aria-labelledby="backupToolsTitle">
@@ -67,4 +96,4 @@
     </div>
   </form>
 </dialog><dialog id="undoDialog" class="confirm-dialog" aria-labelledby="undoTitle"><div class="confirm-content"><div class="confirm-eyebrow">CONFIRM ACTION</div><h2 id="undoTitle">Remove last transaction?</h2><p class="muted">Please review the transaction before removing it.</p><div class="confirm-record"><strong id="undoName"></strong><span id="undoDetails"></span><span id="undoDate"></span></div><p class="confirm-warning">This cannot be undone.</p><div class="confirm-actions"><button type="button" id="cancelUndo" class="secondary">Cancel</button><button type="button" id="confirmUndo" class="danger-btn">Remove Transaction</button></div></div></dialog><dialog id="entryDialog"><form id="entryForm"><div class="dialog-head"><h2 id="dialogTitle">Add bourbon</h2><button type="button" class="close-btn" id="closeDialog" aria-label="Close">×</button></div><div id="addFields"><label>Bourbon name<input id="whiskeyName" maxlength="100" autocomplete="off" placeholder="e.g. Four Roses Small Batch"></label><label>Proof<input id="whiskeyProof" type="number" min="0.01" max="200" step="any" inputmode="decimal" placeholder="e.g. 100"></label></div><label>Amount (US fluid oz)<input id="entryAmount" type="number" min="0.01" step="any" inputmode="decimal" required placeholder="e.g. 1.5"></label><label>Date<input id="entryDate" type="date" required></label><label>Note (optional)<textarea id="entryNote" rows="2" maxlength="500" placeholder="Tasting notes or details"></textarea></label><div id="formError" class="error" role="alert"></div><button class="primary submit" type="submit" id="submitEntry">Save addition</button></form></dialog>
-<div id="toast" role="status" aria-live="polite"></div><script src="https://accounts.google.com/gsi/client" async defer></script><script src="./drive-config.js" defer></script><script src="./app.js?v=1.3.8" defer></script><script src="./drive-sync.js?v=1.3.8" defer></script></body></html>
+<div id="toast" role="status" aria-live="polite"></div><script src="https://accounts.google.com/gsi/client" async defer></script><script src="./drive-config.js" defer></script><script src="./app.js?v=1.3.9" defer></script><script src="./drive-sync.js?v=1.3.9" defer></script></body></html>

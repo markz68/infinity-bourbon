@@ -1,7 +1,7 @@
 /* v1.3.5: network-first same-origin updates, offline fallback. */
-const CACHE='infinity-bourbon-static-v1-3-8';
+const CACHE='infinity-bourbon-static-v1-3-9';
 const PREFIX='infinity-bourbon-static-';
-const ASSETS=['./','./index.html','./styles.css?v=1.3.8','./app.js?v=1.3.8','./drive-sync.js?v=1.3.8','./drive-config.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const ASSETS=['./','./index.html','./about.html','./theme.js?v=1.3.9','./styles.css?v=1.3.9','./app.js?v=1.3.9','./drive-sync.js?v=1.3.9','./drive-config.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
