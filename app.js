@@ -26,14 +26,75 @@ $('undoBtn').onclick=()=>{if(!entries.length)return;const last=entries[entries.l
 $('cancelUndo').onclick=()=>undoDialog.close();
 undoDialog.addEventListener('close',()=>{pendingUndo=null;});
 $('confirmUndo').onclick=()=>{if(pendingUndo===null||JSON.stringify(entries)!==pendingUndo){undoDialog.close();alert('History changed. Review Undo Last again.');return;}try{save(entries.slice(0,-1));undoDialog.close();toast('Last transaction removed');}catch(e){alert(e.message);}};
-$('newBottleBtn').onclick=()=>{if(!entries.length){toast('Your bottle is already empty');return;}if(!confirm('START NEW BOTTLE\n\nThis will remove all '+entries.length+' transactions from this device.\n\nDownload a JSON backup first. This is not reversible with Undo Last.\n\nContinue?'))return;if(!confirm('FINAL CONFIRMATION\n\nClear this bottle and start fresh?\n\nIf you sync afterward, the empty history may also replace your Google Drive copy.'))return;try{save([]);toast('New empty bottle started');backupDialog.close();}catch(e){alert(e.message);}};
+$('newBottleBtn').onclick=()=>{if(!entries.length){toast('Your bottle is already empty');return;}if(!confirm('START NEW BOTTLE\n\nThis will remove all '+entries.length+' transactions from this device.\n\nDownload a JSON backup first. This is not reversible with Undo Last.\n\nContinue?'))return;if(!confirm('FINAL CONFIRMATION\n\nClear this bottle and start fresh?\n\nYou can still restore a saved Google Drive backup.'))return;try{save([]);toast('New empty bottle started');backupDialog.close();}catch(e){alert(e.message);}};
 function download(filename,content,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
-$('exportJson').onclick=()=>download('infinity-bourbon-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:'Infinity Bourbon',schemaVersion:1,exportedAt:new Date().toISOString(),transactions:entries},null,2),'application/json');
-$('exportCsv').onclick=()=>{const fields=['type','date','name','amount','proof','note'];const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';const csv=[fields.join(','),...entries.map(e=>fields.map(k=>q(e[k])).join(','))].join('\r\n');download('infinity-bourbon-history.csv','\ufeff'+csv,'text/csv;charset=utf-8');};
-$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('File is too large');const data=JSON.parse(await file.text());if(data.app!=='Infinity Bourbon'||data.schemaVersion!==1||!validEntries(data.transactions))throw Error('Not a valid Infinity Bourbon backup');calculate(data.transactions);if(confirm('Replace all current entries with '+data.transactions.length+' imported transactions? Export a backup first if needed.')){save(data.transactions);toast('Backup imported');}}catch(err){alert('Import failed: '+err.message);}finally{e.target.value='';}};
+function localDate(date) {
+ const year=date.getFullYear();
+ const month=String(date.getMonth()+1).padStart(2,'0');
+ const day=String(date.getDate()).padStart(2,'0');
+ return year+'-'+month+'-'+day;
+}
+function describeHistory(records) {
+ const additions=records.filter(record=>record.type==='add').length;
+ const pours=records.length-additions;
+ const count=(number,label)=>number+' '+label+(number===1?'':'s');
+ return count(records.length,'transaction')+' ('+count(additions,'addition')+', '+count(pours,'pour')+')';
+}
+function confirmBackupAction(title, detail, action) {
+ const dialog=$('backupConfirm');
+ if(dialog.open)return Promise.resolve(false);
+ $('backupConfirmTitle').textContent=title;
+ $('backupConfirmDetail').textContent=detail;
+ $('backupConfirmAction').textContent=action;
+ dialog.returnValue='cancel';
+ return new Promise(resolve=>{
+  dialog.addEventListener('close',()=>resolve(dialog.returnValue==='confirm'),{once:true});
+  dialog.showModal();
+ });
+}
+$('exportJson').onclick=()=>{
+ const now=new Date();
+ download('infinity-bourbon-backup-'+localDate(now)+'.json',
+  JSON.stringify({app:'Infinity Bourbon',schemaVersion:1,exportedAt:now.toISOString(),transactions:entries},null,2),
+  'application/json');
+ $('fileStatus').textContent='Backup file exported.';
+};
+$('exportCsv').onclick=()=>{
+ const fields=['type','date','name','amount','proof','note'];
+ const quote=value=>'"'+String(value??'').replaceAll('"','""')+'"';
+ const spreadsheetCell=value=>typeof value==='string'&&/^[\s]*[=+@-]|^[\t\r\n]/.test(value)?"'"+value:value;
+ const csv=[fields.join(','),...entries.map(record=>fields.map(field=>quote(spreadsheetCell(record[field]))).join(','))].join('\r\n');
+ download('infinity-bourbon-history.csv','\ufeff'+csv,'text/csv;charset=utf-8');
+};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async event=>{
+ const input=event.target;
+ const file=input.files[0];
+ if(!file)return;
+ const status=$('fileStatus');
+ $('importBtn').disabled=true;
+ try{
+  if(file.size>5e6)throw Error('File is too large');
+  const data=JSON.parse(await file.text());
+  if(data?.app!=='Infinity Bourbon'||data.schemaVersion!==1||!validEntries(data.transactions))throw Error('Choose a valid Infinity Bourbon JSON backup.');
+  calculate(data.transactions);
+  const before=localStorage.getItem(KEY);
+  const accepted=await confirmBackupAction('Restore from Backup File?',
+   'Replace '+describeHistory(entries)+' on this device with '+describeHistory(data.transactions)+' from '+file.name+'?','Restore Backup');
+  if(!accepted){status.textContent='Restore canceled.';return;}
+  if(localStorage.getItem(KEY)!==before)throw Error('Local history changed. Try again.');
+  save(data.transactions);
+  status.textContent='Backup restored. This device now has '+describeHistory(entries)+'.';
+ }catch(error){status.textContent='Restore failed: '+error.message;}
+ finally{input.value='';$('importBtn').disabled=false;}
+};
 const backupDialog=$('backupDialog');
-const openBackup=()=>{if(!backupDialog.open)backupDialog.showModal();};
-$('settingsTop').onclick=openBackup;
-$('closeBackup').onclick=()=>backupDialog.close();
-backupDialog.addEventListener('click',e=>{if(e.target===backupDialog)backupDialog.close();});
+const backupTools=$('backupTools');
+$('settingsTop').onclick=()=>backupDialog.showModal();
+$('closeBackup').onclick=$('settingsDone').onclick=()=>backupDialog.close();
+$('openBackupTools').onclick=()=>backupTools.showModal();
+$('backToSettings').onclick=$('backupDone').onclick=()=>backupTools.close();
+for(const dialog of [backupDialog,backupTools]){
+ dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
+}
 render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

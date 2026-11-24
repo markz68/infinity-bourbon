@@ -1,6 +1,6 @@
 # Infinity Bourbon
 
-**Current release: v1.3.7**
+**Version: v1.3.8**
 
 Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for tracking a personal infinity bottle of bourbon. It runs in modern browsers on Android and Windows, and can be installed on supported devices.
 
@@ -19,7 +19,7 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 - Offers **manual Google Drive synchronization** between devices using Google's private application-data folder.
 - Provides explicit **Restore from Google Drive** (cloud to this device) and **Back Up to Google Drive** (this device to cloud) actions with confirmations and safety checks.
 - Shows the current app version beneath the title in the header, as in Milestones.
-- Provides a single top-right **Settings** gear for Google Drive sync, JSON backup/restore, CSV export, bottle management, and advanced recovery. No duplicate Backup & Sync button on the main screen.
+- Provides a single top-right **Settings** gear for Backup & Restore and bottle management.
 
 ## Install and use
 
@@ -31,37 +31,38 @@ Infinity Bourbon is an installable, offline-first Progressive Web App (PWA) for 
 
 ## Settings: backup, restore, and synchronization
 
-Open **Settings** using the gear in the top-right header on Android or Windows. The main screen has no separate Backup & Sync button. Scroll inside Settings to find Local backups, Bottle management, and Advanced recovery. The app version appears in the main footer and at the bottom of Settings.
+Open the top-right gear, then choose **Backup & Restore**.
 
-### Local backups
+### Backup File (JSON)
 
-- **Download JSON backup**: Save the transaction history in a restorable format.
-- **Export CSV for Excel**: Export transactions for viewing or analysis. CSV is not the restore format.
-- **Import JSON backup**: Replace the current local history only after a confirmation.
+- **Export Backup File** downloads a restorable JSON copy named `infinity-bourbon-backup-YYYY-MM-DD.json`.
+- **Restore from Backup File** validates the selected file and previews its transaction counts before replacing local history. Older Infinity Bourbon JSON backups can still be restored under their original filenames.
+
+### Spreadsheet (CSV)
+
+**Export CSV** downloads additions and pours for Excel or other spreadsheet apps. Use the JSON file to restore the app.
 
 ### Google Drive
 
-Google Drive sync is optional and **manual**, not automatic. It uses the `drive.appdata` permission to store a backup in a private application-data folder.
+Drive sync is optional and manual. Backups use the existing private application-data folder.
 
-1. Open **Settings** and select **Connect Google Drive**.
-2. On a fresh installation, select **Restore from Google Drive** to download your existing cloud history. Review the record counts and confirm. This leaves the cloud copy unchanged.
-3. Select **Back Up to Google Drive** to upload this device’s records. It requires confirmation before replacing a different cloud copy, including a warning if the device is empty.
-4. Use **Sync now** for normal comparison-based synchronization.
-5. Before switching devices, sync the device you were using. On the other device, sync **before editing**, and sync again after making changes.
-6. Read confirmation dialogs carefully. If the local and cloud histories conflict, the app avoids silently overwriting either copy.
-7. **Advanced recovery** contains an explicit recovery upload that can overwrite the cloud history after two confirmations. Use it only when you understand which copy should be kept and have exported backups.
+1. Select **Connect Google Drive**.
+2. On a fresh installation, select **Restore from Google Drive** and confirm the preview.
+3. Use **Back Up to Google Drive** to send this device’s history to Drive. Review the preview before replacing a different cloud copy.
+4. Use **Sync Now** for routine synchronization. If both copies have changed, review the conflict and select the direction explicitly.
+5. Check the connection and last successful sync or backup/restore above the action buttons. An empty device cannot overwrite a nonempty Drive history.
 
 Connecting to Google may need to be repeated after a browser or app restart. Sync requires an internet connection. A UI update does not revoke the current Google OAuth token, but token expiry or browser restarts may still require reconnection.
 
 ## Updating and troubleshooting
 
 - On Android or Windows, reopen or refresh the installed app after deployment. If the old layout persists, allow the service worker to update and reopen the app. A mixed cache of old JavaScript and new HTML could cause v1.3.3 to show empty default values and an unresponsive gear; v1.3.6 includes a compatibility hook to prevent this startup failure. Do not clear browser/site data to force an update.
-- Check for **v1.3.7** beneath the app name in the header (and in the footer). Use the top-right gear for all backup and sync operations.
-- The current Drive connection status appears inside Settings. A connection may need renewing independently of an app update.
+- Check for **v1.3.8** beneath the app name in the header (and in the footer). Use the top-right gear for all backup and sync operations.
+- The current Drive connection status appears in Settings → Backup & Restore. A connection may need renewing independently of an app update.
 
 ## Data safety and important limitations
 
-- **Start New Bottle** clears the current device's transaction history after two confirmations. Export a JSON backup first. Syncing afterward can replace the cloud history with the empty bottle.
+- **Start New Bottle** clears the current device's transaction history after two confirmations. Export a JSON backup first. A nonempty Google Drive backup remains available to restore.
 
 - The working transaction history is stored in the browser's `localStorage`. **Do not clear site data or uninstall the PWA without a verified JSON backup.** Browser profiles or devices may have different local histories.
 - Google Drive sync is **not** an automatic, continuous backup. Sync deliberately when switching devices and retain independent JSON backups.
@@ -80,6 +81,7 @@ Connecting to Google may need to be repeated after a browser or app restart. Syn
 | **1.2.x** | Added and refined manual Google Drive synchronization, safer conflict handling, and verified recovery upload. |
 | **1.2.3** | Confirmed successful two-way synchronization between Android and Windows. |
 | **1.3.5** | Service worker now checks the network for updated app files and falls back to cached files offline; addresses stale versions at the normal URL. |
+| **1.3.8** | Added a dedicated Backup & Restore screen, standardized JSON names and Drive controls, and protected nonempty Drive backups from empty-device uploads. |
 | **1.3.7** | Added the current version beneath the app name in the header, matching the Milestones layout while retaining the purple theme. |
 | **1.3.6** | Added explicit Google Drive restore and backup actions, including fresh-install restore, record-count previews, overwrite confirmations, and cloud-change checks. |
 | **1.3.4** | Compatibility hook for older cached scripts to avoid a blank startup. |

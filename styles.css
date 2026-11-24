@@ -37,3 +37,7 @@ input[type="file"][hidden]{display:none!important}
 /* v1.3.7: Milestones-style version beneath app title */
 .brand .header-version{display:block;margin-top:2px;color:#f0ddfa;font-size:12px;font-weight:650;line-height:1.3}
 .brand small{margin-top:3px}
+
+.backup-stack[hidden]{display:none}
+.backup-group [role="status"]:empty{display:none}
+#backupConfirmDetail{overflow-wrap:anywhere}
